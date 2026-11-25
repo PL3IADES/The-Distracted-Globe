@@ -15,15 +15,49 @@ A private watch-together player you host from your own computer. Put video files
 
 ---
 
-## 1. Install (one time)
+## Every movie night
+
+Open two terminal windows in this folder and run:
+
+```bash
+npm start          # window 1: the app
+npm run tunnel     # window 2: connects it to https://movies.miloboynton.cc
+```
+
+Leave both open while you watch; closing either one takes the link down. On a Mac host, use `caffeinate -i npm start` so it doesn't sleep mid-movie.
+
+The link to send her is `https://movies.miloboynton.cc/w/<ROOM_TOKEN>/`. `npm start` prints it, and the password is `ROOM_PASSWORD` in `.env`.
+
+> Send the **link** and the **password** separately, for example the link by text and the password by phone call.
+
+To watch on the host computer itself, open the printed **"Open on this computer"** link (it looks like `http://127.0.0.1:3000/w/<token>/`, and the `/w/<token>/` part is required, since `http://127.0.0.1:3000` on its own shows "Not found") and log in.
+
+New movie to watch? See [Add movies](#2-add-movies).
+
+**"This site can't be reached"?** The server isn't running. Look in the terminal for an error: `Missing SECRET…` means run `npm run setup` first, and `Port 3000 is already in use` means it's already running in another window.
+
+### Watching together
+
+1. Both open the link and log in. Your names appear at the top right.
+2. Either person picks a video from the menu. It loads for both.
+3. Either person presses play, pause or scrubs, and the other follows. The status line under the video shows whether you're in sync.
+4. Safari sometimes blocks a video from starting until you've clicked the page. If a **"Click to join playback"** button appears, click it once.
+
+---
+
+# First-time setup
+
+You only do this once per host computer.
+
+## 1. Install
 
 You need **Node.js 18+** and **ffmpeg** on the computer that will host.
 
-| | Mac | Windows |
-|---|---|---|
-| Node.js | `brew install node` | `winget install OpenJS.NodeJS.LTS` |
-| ffmpeg | `brew install ffmpeg` | `winget install ffmpeg` |
-| cloudflared | `brew install cloudflared` | `winget install Cloudflare.cloudflared` |
+| | Mac | Windows | Arch Linux |
+|---|---|---|---|
+| Node.js | `brew install node` | `winget install OpenJS.NodeJS.LTS` | `sudo pacman -S nodejs npm` |
+| ffmpeg | `brew install ffmpeg` | `winget install ffmpeg` | `sudo pacman -S ffmpeg` |
+| cloudflared | `brew install cloudflared` | `winget install Cloudflare.cloudflared` | `sudo pacman -S cloudflared` |
 
 Then, in this folder:
 
@@ -46,17 +80,7 @@ This writes `media/Some Movie.mp4`, which is H.264 + AAC with "faststart", so it
 
 Already have a browser-friendly `.mp4`? Just drop it in `media/`. A `Name.vtt` next to `Name.mp4` shows up as subtitles.
 
-## 3. Start it
-
-```bash
-npm start
-```
-
-Leave that window open; closing it stops the server. Open the printed **"Open on this computer"** link (it looks like `http://127.0.0.1:3000/w/<token>/`, and the `/w/<token>/` part is required, since `http://127.0.0.1:3000` on its own shows "Not found") and log in.
-
-**"This site can't be reached"?** The server isn't running. Look in the terminal for an error: `Missing SECRET…` means run `npm run setup` first, and `Port 3000 is already in use` means it's already running in another window.
-
-## 4. Put it on the internet with Cloudflare Tunnel
+## 3. Put it on the internet with Cloudflare Tunnel
 
 The tunnel gives you an `https://` address without opening router ports or exposing your home IP.
 
@@ -75,22 +99,7 @@ npm run tunnel -- setup movies.miloboynton.cc
 ```
 This opens a browser to log in to Cloudflare (pick `miloboynton.cc`), creates a tunnel called `movienight`, adds the `movies` DNS record, and saves the address in `.env`. It never overwrites an existing DNS record.
 
-Every movie night, run these in two terminal windows:
-```bash
-npm start          # window 1: the app
-npm run tunnel     # window 2: connects it to https://movies.miloboynton.cc
-```
-
-The link to send her is `https://movies.miloboynton.cc/w/<ROOM_TOKEN>/`. `npm start` prints it.
-
-> Send the **link** and the **password** separately, for example the link by text and the password by phone call.
-
-## 5. Watching together
-
-1. Both open the link and log in. Your names appear at the top right.
-2. Either person picks a video from the menu. It loads for both.
-3. Either person presses play, pause or scrubs, and the other follows. The status line under the video shows whether you're in sync.
-4. Safari sometimes blocks a video from starting until you've clicked the page. If a **"Click to join playback"** button appears, click it once.
+After that, follow [Every movie night](#every-movie-night).
 
 ## Settings and maintenance
 
@@ -108,7 +117,7 @@ Other options live in `.env`, which is git-ignored, so never commit it: `PORT`, 
 Your home **upload** speed is the limit, because she streams from you. 1080p at the default quality is usually about 3–8 Mbps. If she buffers, convert with `--max-height 720` or `--quality 23`. Run a speed test and look at the *upload* number.
 
 ### Keeping your computer awake
-On a Mac host, run `caffeinate -i npm start` so it doesn't sleep mid-movie. On Windows, set sleep to "Never" while plugged in.
+On a Mac host, run `caffeinate -i npm start` so it doesn't sleep mid-movie. On Windows, set sleep to "Never" while plugged in. On Linux, `systemd-inhibit npm start` does the same.
 
 ## How it works
 
