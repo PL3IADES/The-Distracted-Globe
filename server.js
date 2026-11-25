@@ -18,7 +18,7 @@ const HOST = process.env.HOST || '127.0.0.1';
 const SECRET = process.env.SECRET;
 const ROOM_TOKEN = process.env.ROOM_TOKEN;
 const ROOM_PASSWORD = process.env.ROOM_PASSWORD;
-const PUBLIC_URL = (process.env.PUBLIC_URL || `http://localhost:${PORT}`).replace(/\/+$/, '');
+const PUBLIC_URL = (process.env.PUBLIC_URL || `http://127.0.0.1:${PORT}`).replace(/\/+$/, '');
 const MEDIA_DIR = path.resolve(process.env.MEDIA_DIR || path.join(__dirname, 'media'));
 const SESSION_DAYS = Number(process.env.SESSION_DAYS) || 7;
 
@@ -384,12 +384,35 @@ setInterval(() => {
   if (room.video && io.engine.clientsCount > 0) io.emit('state', { ...snapshot(), reason: 'tick' });
 }, 2000);
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n✗ Port ${PORT} is already in use (is Movie Night already running in another window?).`);
+    console.error('  Close the other one, or set a different PORT in .env.\n');
+  } else {
+    console.error('\n✗ Could not start the server:', err.message, '\n');
+  }
+  process.exit(1);
+});
+
 server.listen(PORT, HOST, () => {
-  console.log(`\n🍿 Movie Night is running on http://${HOST}:${PORT}`);
+  const local = `http://${HOST === '0.0.0.0' || HOST === '::' ? '127.0.0.1' : HOST}:${PORT}${BASE}/`;
+  console.log(`\n🍿 Movie Night is running. Leave this window open while you watch.`);
   console.log(`   Media folder: ${MEDIA_DIR}`);
   console.log(`   Videos found: ${listVideos().length}`);
-  console.log(`\n   Room link (share this + the password):\n   ${PUBLIC_URL}${BASE}/\n`);
+  console.log(`\n   Open on this computer:\n   ${local}`);
+  if (!PUBLIC_URL.includes('localhost') && !PUBLIC_URL.includes('127.0.0.1')) {
+    console.log(`\n   Link to share (+ the password):\n   ${PUBLIC_URL}${BASE}/`);
+  }
+  console.log('');
 });
+
+// Macs often resolve "localhost" to IPv6 (::1). Also listen there so http://localhost works too.
+if (HOST === '127.0.0.1') {
+  const v6 = http.createServer(app);
+  io.attach(v6);
+  v6.on('error', () => {}); // IPv6 disabled on this machine: fine, IPv4 still works
+  v6.listen(PORT, '::1');
+}
 
 // ---------------------------------------------------------------------------
 function loadEnvFile(file) {

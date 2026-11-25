@@ -34,7 +34,7 @@ const randomPassword = () =>
 env.SECRET ||= crypto.randomBytes(32).toString('hex');
 if (!env.ROOM_TOKEN || args.includes('--new-link')) env.ROOM_TOKEN = crypto.randomBytes(18).toString('base64url');
 env.ROOM_PASSWORD = argValue('--password') || env.ROOM_PASSWORD || randomPassword();
-env.PUBLIC_URL = argValue('--url') || env.PUBLIC_URL || 'http://localhost:3000';
+env.PUBLIC_URL = argValue('--url') || env.PUBLIC_URL || 'http://127.0.0.1:3000';
 env.PORT ||= '3000';
 env.HOST ||= '127.0.0.1';
 env.MEDIA_DIR ||= './media';

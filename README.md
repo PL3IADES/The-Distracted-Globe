@@ -52,7 +52,9 @@ Already have a browser-friendly `.mp4`? Just drop it in `media/`. A `Name.vtt` n
 npm start
 ```
 
-Open the printed link yourself (it works on `localhost` right away) and log in.
+Leave that window open; closing it stops the server. Open the printed **"Open on this computer"** link (it looks like `http://127.0.0.1:3000/w/<token>/`, and the `/w/<token>/` part is required, since `http://127.0.0.1:3000` on its own shows "Not found") and log in.
+
+**"This site can't be reached"?** The server isn't running. Look in the terminal for an error: `Missing SECRET…` means run `npm run setup` first, and `Port 3000 is already in use` means it's already running in another window.
 
 ## 4. Put it on the internet with Cloudflare Tunnel
 
@@ -60,27 +62,26 @@ The tunnel gives you an `https://` address without opening router ports or expos
 
 ### Option A: quick test, no domain needed
 ```bash
-cloudflared tunnel --url http://localhost:3000
+cloudflared tunnel --url http://127.0.0.1:3000
 ```
 It prints a random `https://….trycloudflare.com` address. Your guest's link is that address + `/w/<ROOM_TOKEN>/`. The address changes every time you run it.
 
-### Option B: your own domain, e.g. `movies.yourdomain.com`
-Your domain's DNS must be managed by Cloudflare (the free plan is fine).
+### Option B: your own domain, `movies.miloboynton.cc`
+Your domain's DNS is already on Cloudflare, so this is free. A subdomain doesn't affect your main website.
 
+One-time setup:
 ```bash
-cloudflared tunnel login                      # opens browser, pick your domain
-cloudflared tunnel create movienight
-cloudflared tunnel route dns movienight movies.yourdomain.com
-cloudflared tunnel run --url http://localhost:3000 movienight
+npm run tunnel -- setup movies.miloboynton.cc
+```
+This opens a browser to log in to Cloudflare (pick `miloboynton.cc`), creates a tunnel called `movienight`, adds the `movies` DNS record, and saves the address in `.env`. It never overwrites an existing DNS record.
+
+Every movie night, run these in two terminal windows:
+```bash
+npm start          # window 1: the app
+npm run tunnel     # window 2: connects it to https://movies.miloboynton.cc
 ```
 
-Then tell the app its public address, so it prints the right link:
-
-```bash
-npm run setup -- --url https://movies.yourdomain.com
-```
-
-Restart `npm start`. The link it prints is the one you send.
+The link to send her is `https://movies.miloboynton.cc/w/<ROOM_TOKEN>/`. `npm start` prints it.
 
 > Send the **link** and the **password** separately, for example the link by text and the password by phone call.
 
@@ -95,6 +96,7 @@ Restart `npm start`. The link it prints is the one you send.
 
 | Task | Command |
 |---|---|
+| Use a different subdomain | `npm run tunnel -- setup tv.miloboynton.cc` |
 | New room link (old one stops working) | `npm run setup -- --new-link` |
 | New password (logs everyone out) | `npm run setup -- --password "…"` |
 | Better or worse convert quality | `npm run convert -- --quality 18 file.mkv` (lower = better, bigger) |
