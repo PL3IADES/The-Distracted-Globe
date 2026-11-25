@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Movie Night</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>🍿 Movie Night</h1>
+  <label class="picker">
+    <span class="sr-only">Video</span>
+    <select id="videoSelect"><option value="">Choose a video…</option></select>
+  </label>
+  <div id="presence" class="presence"></div>
+  <form method="post" action="logout"><button class="link" type="submit">Log out</button></form>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="video-wrap">
+      <video id="video" controls playsinline preload="auto"></video>
+      <div id="empty" class="empty">Pick a video from the menu to start.</div>
+      <button id="unlock" class="unlock" hidden>▶ Click to join playback</button>
+    </div>
+    <div id="status" class="status">Connecting…</div>
+  </section>
+
+  <aside class="chat">
+    <ul id="messages"></ul>
+    <form id="chatForm">
+      <input id="chatInput" maxlength="500" placeholder="Say something…" autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+  </aside>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/static/player.js"></script>
+</body>
+</html>
